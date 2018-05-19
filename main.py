@@ -5,20 +5,39 @@ result = mm.parseDependencies(mm.treeParser(mm.rootname), mm.rootname)
 text = mm.MyEncoder().encode(mm.moduledict['Dispatcher'])
 mm.writeToFile(text)
 
-# burdan calıstırıyoruz
+dependencyDict = {}
 
-for dispatcherchilds in mm.moduledict['Dispatcher'].childs:
-    modulename = dispatcherchilds.rootname
-    print(modulename)
-    path = '/Users/oredata/Desktop/ivr_architecture/workspace/' + modulename + '/WEB-INF/src/flow'
-    func_traverse_path(path, modulename)
+def traverse_dictionary(keystr,m,requestedChild):
+    its_instance = invoked_tree_structure(keystr,m,[])
+    for child in mm.moduledict[keystr].childs:
 
-i = 1
-for x in denemelist:
-    print(str(i) + '.')
-    print('Java Name: ' + x.java_name)
-    print('Java Path: ' + x.java_path)
-    print('module name: ' + x.module_name)
-    if x.node_name != '':
-        print('node name: ' + x.node_name)
-    i = i + 1
+        modulename = child.rootname
+        if(modulename != requestedChild and requestedChild != ''):
+            continue
+       # print("Start Module : "+modulename)
+        path = '/Users/oredata/Desktop/ivr_architecture/workspace/' + modulename + '/WEB-INF/src/flow'
+        if(modulename not in dependencyDict.keys()):
+            if(modulename == 'KK_LiraYukleme'):
+                print('emin')
+            moduledependencylist =  func_traverse_path(path, modulename)
+            moduledependencylist = getDecreasedModuleList(moduledependencylist)
+        else:
+            moduledependencylist = dependencyDict[modulename]
+        if(len(child.childs)> 0):
+            dependencyDict[modulename]=moduledependencylist
+        its_instance.childs.append(traverse_dictionary(modulename,moduledependencylist,''))
+
+       # print("End Module : " + modulename)
+    return its_instance
+
+def debugall():
+    #its = traverse_dictionary('Postpaid_500_Menu_ve_AltMenuler', [])
+    its = traverse_dictionary('Dispatcher', [], 'Postpaid_500_Menu_ve_AltMenuler')
+    print(its)
+    invokedfiletojson(its)
+
+
+
+debugall()
+
+
